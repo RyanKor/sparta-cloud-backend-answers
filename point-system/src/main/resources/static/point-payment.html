@@ -1,0 +1,1463 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>포인트 결제 테스트</title>
+    <script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 700px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .point-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .point-info h3 {
+            font-size: 14px;
+            margin-bottom: 8px;
+            opacity: 0.9;
+        }
+
+        .point-balance {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .point-balance small {
+            font-size: 16px;
+            opacity: 0.8;
+        }
+
+        .membership-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-top: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .membership-normal {
+            background: rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .membership-vip {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .membership-vvip {
+            background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            color: #333;
+        }
+
+        .payment-history {
+            margin-top: 24px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .payment-history h3 {
+            margin-bottom: 16px;
+            color: #333;
+            font-size: 18px;
+        }
+
+        .payment-item {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .payment-item-info {
+            flex: 1;
+        }
+
+        .payment-item-amount {
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .point-charge-btn {
+            margin-top: 12px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .point-charge-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.8);
+        }
+
+        .shop-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand-logo {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .brand h2 {
+            font-size: 18px;
+            color: #444;
+        }
+
+        .badge {
+            font-size: 11px;
+            background: #e6f4ff;
+            color: #1677ff;
+            padding: 3px 8px;
+            border-radius: 999px;
+            border: 1px solid #bae0ff;
+        }
+
+        .product {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 20px;
+            padding: 16px;
+            border: 2px solid #f0f0f0;
+            border-radius: 12px;
+            background: #fafafa;
+            margin-bottom: 20px;
+        }
+
+        .product-image {
+            width: 120px;
+            height: 120px;
+            border-radius: 10px;
+            background: #e9e9ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #667eea;
+            font-weight: 700;
+        }
+
+        .product-info h3 {
+            font-size: 18px;
+            color: #222;
+            margin-bottom: 6px;
+        }
+
+        .product-info p {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .price-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .price {
+            font-size: 18px;
+            font-weight: 800;
+            color: #333;
+        }
+
+        .point-usage-section {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .point-usage-section h4 {
+            color: #333;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .point-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .point-input-group input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .point-input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .point-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-point {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            background: #667eea;
+            color: white;
+            transition: all 0.3s;
+        }
+
+        .btn-point:hover {
+            background: #5568d3;
+        }
+
+        .summary {
+            margin-top: 18px;
+            padding: 16px;
+            border: 2px dashed #eaeaea;
+            border-radius: 12px;
+            background: #fff;
+        }
+
+        .summary-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .summary-row.total {
+            margin-top: 6px;
+            padding-top: 10px;
+            border-top: 1px solid #efefef;
+            font-weight: 800;
+            color: #222;
+            font-size: 18px;
+        }
+
+        .summary-row.point-discount {
+            color: #52c41a;
+        }
+
+        .actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        button {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            grid-column: 1 / -1;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .result.success {
+            background: #d4edda;
+            border: 2px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .result.error {
+            background: #f8d7da;
+            border: 2px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .result.info {
+            background: #d1ecf1;
+            border: 2px solid #bee5eb;
+            color: #0c5460;
+        }
+
+        .result h3 {
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .result pre {
+            background: rgba(0,0,0,0.05);
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        .helper-text {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #777;
+        }
+
+        .hidden-field {
+            display: none;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .user-info span {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .logout-btn {
+            padding: 6px 12px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="shop-header">
+        <div class="brand">
+            <div class="brand-logo"></div>
+            <h2>Sparta Point Shop</h2>
+        </div>
+        <span class="badge">포인트 결제 테스트</span>
+    </div>
+
+    <!-- 사용자 정보 섹션 (로그인 후 표시) -->
+    <div class="user-info" id="userInfoSection" style="display: none;">
+        <span id="userInfoText">사용자 정보</span>
+        <button class="logout-btn" onclick="handleLogout()">로그아웃</button>
+    </div>
+
+    <h1>🛒 스파르타 포인트 스토어</h1>
+    <p class="subtitle">포인트를 사용하여 결제할 수 있습니다</p>
+
+    <!-- 포인트 잔액 표시 -->
+    <div class="point-info">
+        <h3>보유 포인트</h3>
+        <div class="point-balance">
+            <span id="pointBalance">0</span><small> P</small>
+        </div>
+        <div id="membershipBadge" class="membership-badge membership-normal">
+            <span id="membershipLevel">Normal</span>
+        </div>
+        <div style="margin-top: 8px; font-size: 12px; opacity: 0.9;">
+            총 결제 금액: <span id="totalPaymentAmount">0</span>원
+        </div>
+        <button class="point-charge-btn" onclick="chargePoints()">💰 100,000 포인트 충전</button>
+    </div>
+
+    <div class="product" id="productInfo">
+        <div class="product-image">IMG</div>
+        <div class="product-info">
+            <h3 id="productName">상품 정보 로딩 중...</h3>
+            <p id="productDescription">상품 설명을 불러오고 있습니다.</p>
+            <div class="price-row">
+                <span class="price" id="productPrice">0원</span>
+                <span class="badge">무료배송</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 포인트 사용 섹션 -->
+    <div class="point-usage-section">
+        <h4>💎 포인트 사용</h4>
+        <div class="point-input-group">
+            <input type="number" id="pointsToUse" placeholder="사용할 포인트 입력" min="0" value="0">
+            <div class="point-buttons">
+                <button class="btn-point" onclick="useAllPoints()">전액 사용</button>
+                <button class="btn-point" onclick="useHalfPoints()">50% 사용</button>
+            </div>
+        </div>
+        <div class="helper-text">
+            사용 가능한 포인트: <strong id="availablePoints">0</strong> P
+        </div>
+    </div>
+
+    <!-- 결제 요약 -->
+    <div class="summary">
+        <div class="summary-row">
+            <span>상품 금액</span>
+            <strong id="summaryPrice">0원</strong>
+        </div>
+        <div class="summary-row point-discount" id="pointDiscountRow" style="display: none;">
+            <span>포인트 할인</span>
+            <strong>-<span id="pointDiscountAmount">0</span>원</strong>
+        </div>
+        <div class="summary-row total">
+            <span>최종 결제 금액</span>
+            <strong id="finalAmount">0원</strong>
+        </div>
+    </div>
+
+    <form id="paymentForm">
+        <input type="hidden" id="orderId" placeholder="order_2024101900001">
+        <input type="hidden" id="userId" value="1">
+        <input type="hidden" id="orderName" value="">
+        <input type="hidden" id="amount" value="0" min="1000">
+        <input type="hidden" id="productId" value="1">
+        <div class="hidden-field">
+            <select id="paymentMethod">
+                <option value="CARD">신용카드</option>
+            </select>
+        </div>
+
+        <div class="actions">
+            <button type="button" class="btn-primary" id="payButton" onclick="processPayment()">포인트 결제하기</button>
+            <button type="button" class="btn-secondary" onclick="checkOrder()">주문 조회</button>
+            <button type="button" class="btn-secondary" onclick="loadPaymentHistory()">결제 내역 조회</button>
+            <button type="button" class="btn-secondary" onclick="createTestProduct()">테스트 상품 생성</button>
+            <button type="button" class="btn-secondary" onclick="loadPointBalance()">포인트 잔액 새로고침</button>
+        </div>
+        
+        <!-- 결제 내역 섹션 -->
+        <div id="paymentHistorySection" class="payment-history" style="display: none;">
+            <h3>결제 내역</h3>
+            <div id="paymentHistoryContent"></div>
+        </div>
+    </form>
+
+    <div id="result" class="result"></div>
+</div>
+
+<script>
+    const API_BASE_URL = '';
+    const STORE_ID = '본인의 발급한 포트원 store id를 넣어주세요';
+    const CHANNEL_KEY = '본인의 발급한 포트원 channel key를 넣어주세요';
+    
+    let USER_ID = null;
+    let authToken = null;
+    let currentUser = null;
+    let isAuthChecking = false; // 인증 상태 확인 중 플래그
+    let authCheckPromise = null; // 인증 상태 확인 Promise
+
+    let currentProduct = null;
+    let pointBalance = 0;
+    let membershipInfo = null;
+
+    // JWT 토큰 관리
+    function getAuthToken() {
+        try {
+            return localStorage.getItem('authToken');
+        } catch (e) {
+            console.error('localStorage에서 토큰 읽기 실패:', e);
+            return null;
+        }
+    }
+
+    function setAuthToken(token) {
+        try {
+            authToken = token;
+            localStorage.setItem('authToken', token);
+        } catch (e) {
+            console.error('localStorage에 토큰 저장 실패:', e);
+            // 저장 실패해도 메모리에 보관
+            authToken = token;
+        }
+    }
+
+    function removeAuthToken() {
+        try {
+            authToken = null;
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userId');
+            localStorage.removeItem('userEmail');
+            localStorage.removeItem('userName');
+        } catch (e) {
+            console.error('localStorage에서 토큰 제거 실패:', e);
+            authToken = null;
+        }
+    }
+
+    function getAuthHeaders() {
+        const token = getAuthToken();
+        if (!token) {
+            return { 'Content-Type': 'application/json' };
+        }
+        return {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        };
+    }
+
+    // 인증된 API 호출
+    async function authenticatedFetch(url, options = {}) {
+        // 인증 상태 확인이 진행 중이면 완료될 때까지 대기
+        if (authCheckPromise) {
+            try {
+                await authCheckPromise;
+            } catch (error) {
+                // 인증 실패 시 에러는 checkAuthStatus에서 처리하므로 여기서는 무시
+            }
+        }
+        
+        const headers = { ...getAuthHeaders(), ...(options.headers || {}) };
+        const response = await fetch(url, { ...options, headers });
+        
+        if (response.status === 401 || response.status === 403) {
+            // 인증 실패 시 - 토큰이 만료된 경우에만 로그아웃
+            // 단, 인증 상태 확인이 진행 중이 아닐 때만 처리
+            if (!isAuthChecking) {
+                const token = getAuthToken();
+                if (!token) {
+                    // 토큰이 없으면 이미 로그아웃된 상태
+                    handleLogout();
+                    throw new Error('인증이 필요합니다.');
+                }
+                // 토큰이 있는데 401이면 만료된 것 - 로그아웃 처리
+                console.warn('인증 토큰이 만료되었습니다.');
+                handleLogout();
+                showResult('error', '❌ 인증 오류', '인증이 만료되었거나 유효하지 않습니다. 다시 로그인해주세요.');
+                throw new Error('인증이 필요합니다.');
+            }
+        }
+        
+        return response;
+    }
+
+    // 로그아웃 처리
+    function handleLogout() {
+        removeAuthToken();
+        USER_ID = null;
+        currentUser = null;
+
+        // 로그인 페이지로 이동
+        window.location.href = 'login.html';
+    }
+
+    // 인증 상태 확인
+    async function checkAuthStatus() {
+        // 이미 인증 확인이 진행 중이면 기존 Promise 반환
+        if (isAuthChecking && authCheckPromise) {
+            return authCheckPromise;
+        }
+        
+        isAuthChecking = true;
+        authCheckPromise = (async () => {
+            try {
+                // localStorage 접근을 위한 재시도 로직 (리다이렉트 후 즉시 접근 시 실패할 수 있음)
+                let token = null;
+                let savedUserId = null;
+                let retryCount = 0;
+                const maxRetries = 5;
+                
+                while (retryCount < maxRetries && (!token || !savedUserId)) {
+                    try {
+                        // localStorage 접근 가능 여부 확인
+                        if (typeof Storage !== 'undefined' && localStorage) {
+                            token = getAuthToken();
+                            savedUserId = localStorage.getItem('userId');
+                            
+                            if (token && savedUserId) {
+                                console.log(`토큰 발견 (시도 ${retryCount + 1}/${maxRetries})`);
+                                break;
+                            } else {
+                                console.log(`토큰 없음 (시도 ${retryCount + 1}/${maxRetries}):`, {
+                                    hasToken: !!token,
+                                    hasUserId: !!savedUserId
+                                });
+                            }
+                        } else {
+                            console.warn('localStorage를 사용할 수 없습니다');
+                        }
+                    } catch (e) {
+                        console.warn(`localStorage 접근 실패 (시도 ${retryCount + 1}/${maxRetries}):`, e);
+                    }
+                    
+                    if (!token || !savedUserId) {
+                        retryCount++;
+                        if (retryCount < maxRetries) {
+                            // 점진적으로 대기 시간 증가 (100ms, 200ms, 300ms, 400ms)
+                            await new Promise(resolve => setTimeout(resolve, 100 * retryCount));
+                        }
+                    }
+                }
+                
+                console.log('인증 상태 확인:', { 
+                    hasToken: !!token, 
+                    hasUserId: !!savedUserId, 
+                    retryCount,
+                    url: window.location.href 
+                });
+                
+                if (!token || !savedUserId) {
+                    // 토큰이 없으면 로그인 페이지로 이동
+                    console.warn('인증 토큰이 없습니다. localStorage 상태:', {
+                        authToken: localStorage.getItem('authToken'),
+                        userId: localStorage.getItem('userId')
+                    });
+                    window.location.href = 'login.html';
+                    return false;
+                }
+
+                // 토큰이 있으면 일단 사용자 정보 설정 (리다이렉트 후 즉시 사용 가능하도록)
+                USER_ID = parseInt(savedUserId);
+                authToken = token;
+                document.getElementById('userInfoSection').style.display = 'block';
+                document.getElementById('userId').value = savedUserId;
+
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+
+                    if (response.ok) {
+                        const userData = await response.json();
+                        USER_ID = userData.userId;
+                        currentUser = userData;
+                        authToken = token;
+
+                        // UI 업데이트
+                        document.getElementById('userInfoSection').style.display = 'block';
+                        document.getElementById('userInfoText').textContent = `${userData.name} (${userData.email})`;
+                        document.getElementById('userId').value = userData.userId;
+
+                        console.log('인증 상태 확인 성공:', userData);
+                        return true;
+                    } else if (response.status === 401) {
+                        // 401 Unauthorized: 토큰이 만료되었거나 유효하지 않음
+                        // 응답 본문 확인
+                        try {
+                            const errorData = await response.json();
+                            console.warn('인증 토큰이 유효하지 않습니다:', errorData);
+                        } catch (e) {
+                            console.warn('인증 토큰이 유효하지 않습니다. Status:', response.status);
+                        }
+                        
+                        // 토큰이 만료된 경우에만 로그인 페이지로 이동
+                        removeAuthToken();
+                        window.location.href = 'login.html';
+                        return false;
+                    } else {
+                        // 기타 오류 (403, 500 등) - 네트워크 오류일 수 있으므로 토큰은 유지
+                        console.warn('인증 상태 확인 실패, 하지만 토큰은 유지합니다. Status:', response.status);
+                        // 토큰이 있으면 일단 사용 (네트워크 일시적 오류일 수 있음)
+                        document.getElementById('userInfoText').textContent = `사용자 ID: ${savedUserId}`;
+                        return true;
+                    }
+                } catch (error) {
+                    // 네트워크 오류 등 - 토큰이 있으면 일단 유지
+                    console.warn('인증 상태 확인 중 네트워크 오류 발생, 토큰은 유지합니다:', error);
+                    document.getElementById('userInfoText').textContent = `사용자 ID: ${savedUserId}`;
+                    return true; // 네트워크 오류는 일시적일 수 있으므로 true 반환
+                }
+            } finally {
+                isAuthChecking = false;
+            }
+        })();
+        
+        return authCheckPromise;
+    }
+
+    // 결과 표시 함수
+    function showResult(type, title, message, data = null) {
+        const resultDiv = document.getElementById('result');
+        resultDiv.className = `result ${type}`;
+        resultDiv.style.display = 'block';
+
+        let html = `<h3>${title}</h3><p>${message}</p>`;
+        if (data) {
+            html += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+        }
+        resultDiv.innerHTML = html;
+
+        resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // 포인트 잔액 조회
+    async function loadPointBalance() {
+        if (!USER_ID) {
+            console.warn('사용자 ID가 없습니다. 로그인이 필요합니다.');
+            return;
+        }
+
+        try {
+            const response = await authenticatedFetch(`${API_BASE_URL}/api/points/balance/${USER_ID}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            pointBalance = data.balance || 0;
+            
+            document.getElementById('pointBalance').textContent = pointBalance.toLocaleString();
+            document.getElementById('availablePoints').textContent = pointBalance.toLocaleString();
+            
+            // 포인트 입력 최대값 설정
+            const pointsInput = document.getElementById('pointsToUse');
+            pointsInput.max = pointBalance;
+            
+            updateSummary();
+            
+            // 멤버십 정보도 함께 로드
+            await loadMembershipInfo();
+        } catch (error) {
+            console.error('포인트 잔액 조회 오류:', error);
+            showResult('error', '❌ 포인트 잔액 조회 실패', `오류: ${error.message}`);
+        }
+    }
+
+    // 멤버십 정보 조회
+    async function loadMembershipInfo() {
+        if (!USER_ID) {
+            displayMembershipInfo('Normal', 0);
+            return;
+        }
+
+        try {
+            const response = await authenticatedFetch(`${API_BASE_URL}/api/membership/user/${USER_ID}/info`);
+            if (!response.ok) {
+                // API 호출 실패 시 기본값 표시
+                console.warn('멤버십 정보 조회 실패, 기본값 사용:', response.status);
+                displayMembershipInfo('Normal', 0);
+                return;
+            }
+
+            const data = await response.json();
+            membershipInfo = data;
+            
+            // 멤버십 등급 표시
+            const levelName = data.level?.name || 'Normal';
+            const totalPaymentAmount = data.totalPaymentAmount || 0;
+            
+            displayMembershipInfo(levelName, totalPaymentAmount);
+        } catch (error) {
+            console.error('멤버십 정보 조회 오류:', error);
+            // 에러 발생 시에도 기본값 표시
+            displayMembershipInfo('Normal', 0);
+        }
+    }
+    
+    // 멤버십 정보 표시 함수
+    function displayMembershipInfo(levelName, totalPaymentAmount) {
+        document.getElementById('membershipLevel').textContent = levelName;
+        document.getElementById('totalPaymentAmount').textContent = Math.floor(totalPaymentAmount).toLocaleString();
+        
+        // 멤버십 배지 스타일 적용
+        const badge = document.getElementById('membershipBadge');
+        badge.className = 'membership-badge';
+        badge.style.display = 'inline-block';
+        
+        // 기존 클래스 제거
+        badge.classList.remove('membership-normal', 'membership-vip', 'membership-vvip');
+        
+        // 등급에 따른 스타일 적용
+        if (levelName === 'Normal') {
+            badge.classList.add('membership-normal');
+        } else if (levelName === 'VIP') {
+            badge.classList.add('membership-vip');
+        } else if (levelName === 'VVIP') {
+            badge.classList.add('membership-vvip');
+        } else {
+            badge.classList.add('membership-normal');
+        }
+    }
+
+    // 결제 내역 조회
+    async function loadPaymentHistory() {
+        if (!USER_ID) {
+            showResult('error', '❌ 인증 필요', '로그인이 필요합니다.');
+            return;
+        }
+
+        try {
+            showResult('info', '⏳ 조회 중...', '결제 내역을 조회하고 있습니다...');
+
+            const response = await authenticatedFetch(`${API_BASE_URL}/api/membership/user/${USER_ID}/payments`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            const completedOrders = data.completedOrders || [];
+            const paidPayments = data.paidPayments || [];
+            const cancelledOrders = data.cancelledOrders || [];
+            const totalPaidAmount = data.totalPaidAmount || 0;
+
+            // 결제 내역 HTML 생성
+            let historyHTML = '';
+            
+            if (completedOrders.length === 0) {
+                historyHTML = '<p style="text-align: center; color: #666;">결제 내역이 없습니다.</p>';
+            } else {
+                historyHTML += `<div style="margin-bottom: 16px; padding: 12px; background: white; border-radius: 8px;">`;
+                historyHTML += `<strong>총 결제 금액: ${Math.floor(totalPaidAmount).toLocaleString()}원</strong><br>`;
+                historyHTML += `<small style="color: #666;">완료 주문: ${completedOrders.length}건 | 취소 주문: ${cancelledOrders.length}건</small>`;
+                historyHTML += `</div>`;
+                
+                completedOrders.forEach((order, index) => {
+                    const payment = paidPayments.find(p => p.orderId === order.orderId);
+                    const paymentAmount = payment ? payment.amount : order.totalAmount;
+                    
+                    historyHTML += `<div class="payment-item">`;
+                    historyHTML += `<div class="payment-item-info">`;
+                    historyHTML += `<div><strong>주문 #${order.orderId}</strong></div>`;
+                    historyHTML += `<div style="font-size: 12px; color: #666; margin-top: 4px;">`;
+                    historyHTML += `${new Date(order.orderedAt).toLocaleString('ko-KR')} | `;
+                    historyHTML += `포인트 사용: ${order.pointsUsed || 0}P`;
+                    historyHTML += `</div>`;
+                    historyHTML += `</div>`;
+                    historyHTML += `<div class="payment-item-amount">${Math.floor(paymentAmount).toLocaleString()}원</div>`;
+                    historyHTML += `</div>`;
+                });
+            }
+
+            document.getElementById('paymentHistoryContent').innerHTML = historyHTML;
+            document.getElementById('paymentHistorySection').style.display = 'block';
+            
+            showResult('success', '✅ 결제 내역 조회 완료', 
+                `총 ${completedOrders.length}건의 결제 내역을 조회했습니다.`, data);
+        } catch (error) {
+            console.error('결제 내역 조회 오류:', error);
+            showResult('error', '❌ 결제 내역 조회 실패', `오류: ${error.message}`);
+        }
+    }
+
+    // 포인트 충전 (100,000 포인트)
+    async function chargePoints() {
+        if (!USER_ID) {
+            showResult('error', '❌ 인증 필요', '로그인이 필요합니다.');
+            return;
+        }
+
+        try {
+            showResult('info', '⏳ 포인트 충전 중...', '100,000 포인트를 충전하고 있습니다...');
+
+            const response = await authenticatedFetch(`${API_BASE_URL}/api/points/charge/${USER_ID}?points=100000&description=테스트용 포인트 충전`, {
+                method: 'POST'
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText);
+            }
+
+            const data = await response.json();
+            
+            showResult('success', '✅ 포인트 충전 완료!', 
+                `100,000 포인트가 충전되었습니다!<br>새로운 잔액: ${data.newBalance.toLocaleString()} 포인트`, 
+                data);
+            
+            // 포인트 잔액 새로고침
+            setTimeout(() => {
+                loadPointBalance();
+            }, 1000);
+            
+        } catch (error) {
+            console.error('포인트 충전 오류:', error);
+            showResult('error', '❌ 포인트 충전 실패', `오류: ${error.message}`);
+        }
+    }
+
+    // 상품 정보 로드
+    async function loadProductInfo() {
+        const productId = document.getElementById('productId').value;
+        
+        try {
+            showResult('info', '⏳ 상품 정보 로딩...', 'DB에서 상품 정보를 가져오고 있습니다...');
+
+            const response = await fetch(`${API_BASE_URL}/api/product/${productId}`);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const product = await response.json();
+            currentProduct = product;
+            
+            document.getElementById('productName').textContent = product.name;
+            document.getElementById('productDescription').textContent = product.description || '상품 설명이 없습니다.';
+            document.getElementById('productPrice').textContent = `${product.price.toLocaleString()}원`;
+            document.getElementById('summaryPrice').textContent = `${product.price.toLocaleString()}원`;
+            document.getElementById('orderName').value = product.name;
+            document.getElementById('amount').value = product.price;
+            
+            updateSummary();
+            
+            showResult('success', '✅ 상품 정보 로드 완료', `상품 정보가 성공적으로 로드되었습니다.`, product);
+        } catch (error) {
+            console.error('상품 정보 로드 오류:', error);
+            showResult('error', '❌ 상품 정보 로드 실패', `오류: ${error.message}`);
+        }
+    }
+
+    // 포인트 사용량에 따른 요약 업데이트
+    function updateSummary() {
+        if (!currentProduct) return;
+
+        const productPrice = parseFloat(currentProduct.price) || 0;
+        const pointsToUse = parseInt(document.getElementById('pointsToUse').value) || 0;
+        
+        // 포인트는 1포인트 = 1원으로 계산
+        const pointDiscount = Math.min(pointsToUse, productPrice, pointBalance);
+        const finalAmount = Math.max(0, productPrice - pointDiscount);
+
+        document.getElementById('pointDiscountAmount').textContent = pointDiscount.toLocaleString();
+        document.getElementById('finalAmount').textContent = `${finalAmount.toLocaleString()}원`;
+
+        if (pointDiscount > 0) {
+            document.getElementById('pointDiscountRow').style.display = 'flex';
+        } else {
+            document.getElementById('pointDiscountRow').style.display = 'none';
+        }
+
+        // 결제 버튼 활성화/비활성화
+        const payButton = document.getElementById('payButton');
+        if (finalAmount > 0) {
+            payButton.textContent = `💳 ${finalAmount.toLocaleString()}원 결제하기`;
+        } else {
+            payButton.textContent = '✅ 포인트로 전액 결제';
+        }
+    }
+
+    // 포인트 전액 사용
+    function useAllPoints() {
+        if (!currentProduct) return;
+        const productPrice = parseFloat(currentProduct.price) || 0;
+        const maxPoints = Math.min(pointBalance, productPrice);
+        document.getElementById('pointsToUse').value = maxPoints;
+        updateSummary();
+    }
+
+    // 포인트 50% 사용
+    function useHalfPoints() {
+        if (!currentProduct) return;
+        const productPrice = parseFloat(currentProduct.price) || 0;
+        const maxPoints = Math.min(pointBalance, productPrice);
+        document.getElementById('pointsToUse').value = Math.floor(maxPoints / 2);
+        updateSummary();
+    }
+
+    // 포인트 입력 이벤트 리스너
+    document.getElementById('pointsToUse').addEventListener('input', function() {
+        const value = parseInt(this.value) || 0;
+        if (value > pointBalance) {
+            this.value = pointBalance;
+        }
+        if (value < 0) {
+            this.value = 0;
+        }
+        updateSummary();
+    });
+
+    // 결제 처리
+    async function processPayment() {
+        if (!USER_ID) {
+            showResult('error', '❌ 인증 필요', '로그인이 필요합니다.');
+            return;
+        }
+
+        const orderId = document.getElementById('orderId').value;
+        const userId = USER_ID; // 인증된 사용자 ID 사용
+        const productId = document.getElementById('productId').value;
+        const orderName = document.getElementById('orderName').value;
+        const productPrice = parseFloat(currentProduct.price) || 0;
+        const pointsToUse = parseInt(document.getElementById('pointsToUse').value) || 0;
+        const finalAmount = Math.max(0, productPrice - Math.min(pointsToUse, productPrice, pointBalance));
+
+        if (!orderId || !userId || !productId || !orderName) {
+            showResult('error', '❌ 입력 오류', '모든 필수 항목을 입력해주세요.');
+            return;
+        }
+
+        try {
+            const payButton = document.getElementById('payButton');
+            payButton.disabled = true;
+            payButton.textContent = '처리 중...';
+
+            showResult('info', '⏳ 처리 중...', '주문을 생성하고 있습니다...');
+
+            // 1. 주문 생성 (포인트 사용 포함)
+            const paymentRequest = {
+                orderId: orderId,
+                userId: parseInt(userId),
+                totalAmount: productPrice,
+                pointsUsed: pointsToUse,
+                pointsDiscountAmount: Math.min(pointsToUse, productPrice, pointBalance),
+                orderName: orderName,
+                paymentMethod: 'CARD',
+                customerName: '테스트 사용자',
+                customerEmail: 'test@example.com',
+                customerPhone: '010-1234-5678',
+                orderItems: [{
+                    productId: parseInt(productId),
+                    quantity: 1,
+                    price: productPrice,
+                    productName: orderName
+                }]
+            };
+
+            const response = await authenticatedFetch(`${API_BASE_URL}/api/payments/request`, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify(paymentRequest)
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText);
+            }
+
+            const resultText = await response.text();
+            showResult('success', '✅ 주문 생성 성공', `주문이 생성되었습니다. 이제 결제를 진행합니다.`);
+
+            // 2. 최종 결제 금액이 0원이면 포인트로 전액 결제 완료
+            if (finalAmount <= 0) {
+                // 포인트 전액 결제 완료 처리 API 호출
+                const completeResponse = await authenticatedFetch(`${API_BASE_URL}/api/payments/complete-point-payment`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({
+                        orderId: orderId
+                    })
+                });
+                
+                if (completeResponse.ok) {
+                    const completeData = await completeResponse.json();
+                    showResult('success', '✅ 포인트 결제 완료!', 
+                        `포인트로 전액 결제가 완료되었습니다!<br>적립 포인트: ${completeData.pointsEarned || 0}P`);
+                    payButton.disabled = false;
+                    payButton.textContent = '포인트 결제하기';
+                    loadPointBalance(); // 포인트 잔액 및 멤버십 정보 새로고침
+                    
+                    setTimeout(() => {
+                        loadPaymentHistory(); // 결제 내역도 새로고침
+                    }, 1000);
+                } else {
+                    const errorText = await completeResponse.text();
+                    showResult('error', '❌ 포인트 결제 완료 처리 실패', errorText);
+                    payButton.disabled = false;
+                    payButton.textContent = '포인트 결제하기';
+                }
+                return;
+            }
+
+            // 3. 최종 결제 금액이 있으면 PortOne 결제 진행
+            showResult('info', '⏳ 결제 창 열기', '결제 창이 열립니다. 테스트 카드 정보를 입력해주세요.');
+
+            const paymentId = `payment-${Date.now()}`;
+
+            // 현재 페이지 URL을 리다이렉트 URL로 설정 (결제 완료 후 같은 페이지로 돌아옴)
+            // 결제 완료 정보를 URL 파라미터로 전달
+            const redirectUrl = window.location.origin + window.location.pathname;
+            
+            const paymentResponse = await PortOne.requestPayment({
+                storeId: STORE_ID,
+                channelKey: CHANNEL_KEY,
+                paymentId: paymentId,
+                orderName: orderName,
+                totalAmount: finalAmount,
+                currency: "CURRENCY_KRW",
+                payMethod: 'CARD',
+                pg: "inicis_v2",
+                customer: {
+                    customerId: String(userId), // PortOne API는 customerId를 문자열로 요구
+                    fullName: "테스트 사용자",
+                    phoneNumber: "010-1234-5678",
+                    email: "test@example.com"
+                },
+                redirectUrl: redirectUrl, // 결제 완료 후 리다이렉트 URL
+                testMode: true,
+                customData: {
+                    orderId: orderId
+                }
+            });
+
+            console.log('결제 응답:', paymentResponse);
+
+            if (paymentResponse.code != null) {
+                showResult('error', '❌ 결제 실패', `오류 코드: ${paymentResponse.code}<br>메시지: ${paymentResponse.message}`, paymentResponse);
+                payButton.disabled = false;
+                payButton.textContent = '포인트 결제하기';
+                return;
+            }
+
+            // PortOne이 리다이렉트를 수행할 수 있으므로, 
+            // 리다이렉트 후에도 결제 정보를 처리할 수 있도록 paymentId를 sessionStorage에 저장
+            if (paymentResponse.paymentId) {
+                sessionStorage.setItem('pendingPaymentId', paymentResponse.paymentId);
+                sessionStorage.setItem('pendingOrderId', orderId);
+                console.log('결제 정보를 sessionStorage에 저장:', {
+                    paymentId: paymentResponse.paymentId,
+                    orderId: orderId
+                });
+            }
+
+            // 리다이렉트가 발생하지 않는 경우를 대비하여 즉시 검증도 시도
+            // (PortOne의 동작에 따라 리다이렉트가 발생할 수도 있고, 발생하지 않을 수도 있음)
+            try {
+                showResult('info', '⏳ 결제 검증 중...', `결제가 완료되었습니다. 백엔드에서 검증하고 있습니다...<br>Payment ID: ${paymentResponse.paymentId}`);
+
+                // 백엔드로 결제 검증 요청
+                await verifyPayment(paymentResponse.paymentId);
+
+                // 검증 성공 시 sessionStorage에서 제거
+                sessionStorage.removeItem('pendingPaymentId');
+                sessionStorage.removeItem('pendingOrderId');
+            } catch (error) {
+                console.warn('결제 검증 중 오류 (리다이렉트 후 재시도 가능):', error);
+                // 오류가 발생해도 리다이렉트 후 재시도할 수 있도록 sessionStorage는 유지
+            }
+
+            payButton.disabled = false;
+            payButton.textContent = '포인트 결제하기';
+
+        } catch (error) {
+            console.error('결제 오류:', error);
+            showResult('error', '❌ 결제 오류', `오류: ${error.message}`);
+            const payButton = document.getElementById('payButton');
+            payButton.disabled = false;
+            payButton.textContent = '포인트 결제하기';
+        }
+    }
+
+    // 결제 검증
+    async function verifyPayment(paymentId) {
+        try {
+            const response = await authenticatedFetch(`${API_BASE_URL}/api/payments/complete`, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({
+                    paymentId: paymentId
+                })
+            });
+
+            const resultText = await response.text();
+
+            if (response.ok) {
+                showResult('success', '✅ 결제 완료!', `결제가 성공적으로 완료되었습니다!<br>Payment ID: ${paymentId}`);
+                loadPointBalance(); // 포인트 잔액 및 멤버십 정보 새로고침
+                
+                setTimeout(() => {
+                    checkOrder();
+                    loadPaymentHistory(); // 결제 내역도 새로고침
+                }, 3000);
+            } else {
+                showResult('error', '❌ 검증 실패', `결제는 완료되었으나 검증에 실패했습니다.<br>응답: ${resultText}`);
+            }
+        } catch (error) {
+            console.error('검증 오류:', error);
+            showResult('error', '❌ 검증 오류', `오류: ${error.message}`);
+        }
+    }
+
+    // 주문 조회
+    async function checkOrder() {
+        if (!USER_ID) {
+            showResult('error', '❌ 인증 필요', '로그인이 필요합니다.');
+            return;
+        }
+
+        const orderId = document.getElementById('orderId').value;
+
+        if (!orderId) {
+            showResult('error', '❌ 입력 오류', '주문 ID를 입력해주세요.');
+            return;
+        }
+
+        try {
+            showResult('info', '⏳ 조회 중...', '주문 정보를 조회하고 있습니다...');
+
+            const response = await authenticatedFetch(`${API_BASE_URL}/api/order/${orderId}`);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            showResult('success', '✅ 주문 조회 성공', '주문 정보가 조회되었습니다.', data);
+        } catch (error) {
+            console.error('주문 조회 오류:', error);
+            showResult('error', '❌ 주문 조회 실패', `오류: ${error.message}`);
+        }
+    }
+
+    // 테스트 상품 생성
+    async function createTestProduct() {
+        try {
+            showResult('info', '⏳ 테스트 상품 생성 중...', 'DB에 테스트 상품을 생성하고 있습니다...');
+
+            const response = await fetch(`${API_BASE_URL}/api/product`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: '테스트 상품',
+                    price: 50000,
+                    stock: 100,
+                    description: '포인트 결제 테스트용 상품입니다.'
+                })
+            });
+
+            const resultText = await response.text();
+
+            if (response.ok) {
+                showResult('success', '✅ 테스트 상품 생성 완료', resultText);
+                setTimeout(() => {
+                    loadProductInfo();
+                }, 1000);
+            } else {
+                showResult('error', '❌ 테스트 상품 생성 실패', resultText);
+            }
+        } catch (error) {
+            console.error('테스트 상품 생성 오류:', error);
+            showResult('error', '❌ 테스트 상품 생성 오류', `오류: ${error.message}`);
+        }
+    }
+
+    // URL 파라미터 및 sessionStorage에서 결제 완료 정보 확인
+    function checkPaymentRedirect() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlPaymentId = urlParams.get('paymentId');
+        const status = urlParams.get('status');
+        
+        // sessionStorage에서 대기 중인 결제 정보 확인
+        const pendingPaymentId = sessionStorage.getItem('pendingPaymentId');
+        const pendingOrderId = sessionStorage.getItem('pendingOrderId');
+        
+        let paymentIdToVerify = null;
+        
+        // URL 파라미터에서 결제 ID 확인
+        if (urlPaymentId && status) {
+            console.log('URL 파라미터에서 결제 리다이렉트 감지:', { paymentId: urlPaymentId, status });
+            paymentIdToVerify = urlPaymentId;
+            
+            // URL에서 결제 파라미터 제거 (깔끔한 URL 유지)
+            const cleanUrl = window.location.origin + window.location.pathname;
+            window.history.replaceState({}, document.title, cleanUrl);
+        } 
+        // sessionStorage에서 대기 중인 결제 정보 확인
+        else if (pendingPaymentId) {
+            console.log('sessionStorage에서 대기 중인 결제 정보 감지:', { 
+                paymentId: pendingPaymentId, 
+                orderId: pendingOrderId 
+            });
+            paymentIdToVerify = pendingPaymentId;
+        }
+        
+        // 결제 검증 처리
+        if (paymentIdToVerify && (status === 'success' || status === 'paid' || !status)) {
+            // status가 없어도 sessionStorage에 있으면 결제 완료로 간주
+            showResult('info', '⏳ 결제 검증 중...', 
+                `결제가 완료되었습니다. 백엔드에서 검증하고 있습니다...<br>Payment ID: ${paymentIdToVerify}`);
+            
+            verifyPayment(paymentIdToVerify).then(() => {
+                // 검증 완료 후 sessionStorage에서 제거
+                sessionStorage.removeItem('pendingPaymentId');
+                sessionStorage.removeItem('pendingOrderId');
+                
+                // 검증 완료 후 포인트 잔액 및 결제 내역 새로고침
+                setTimeout(() => {
+                    loadPointBalance();
+                    if (pendingOrderId) {
+                        document.getElementById('orderId').value = pendingOrderId;
+                        checkOrder();
+                    }
+                    loadPaymentHistory();
+                }, 2000);
+            }).catch(error => {
+                console.error('결제 검증 실패:', error);
+                // 검증 실패해도 sessionStorage는 유지 (재시도 가능하도록)
+            });
+        }
+    }
+
+    // localStorage 접근 안정성 확인 함수
+    function isLocalStorageAvailable() {
+        try {
+            const test = '__localStorage_test__';
+            localStorage.setItem(test, test);
+            localStorage.removeItem(test);
+            return true;
+        } catch (e) {
+            console.warn('localStorage 접근 불가:', e);
+            return false;
+        }
+    }
+
+    // 페이지 로드 시 초기화
+    window.addEventListener('load', async function() {
+        console.log('페이지 로드 시작:', window.location.href);
+        console.log('localStorage 사용 가능 여부:', isLocalStorageAvailable());
+        
+        // ... (localStorage 접근 확인 로직은 그대로 둡니다) ...
+        if (!localStorageReady) {
+            console.error('localStorage 접근 불가 - 로그인 페이지로 이동');
+            window.location.href = 'login.html';
+            return;
+        }
+        
+        // ... (orderId 생성 및 localStorage 상태 확인 로직은 그대로 둡니다) ...
+        const today = new Date();
+        const dateStr = today.toISOString().split('T')[0].replace(/-/g, '');
+        const randomNum = Math.floor(Math.random() * 10000).toString().padStart(5, '0');
+        document.getElementById('orderId').value = `order_${dateStr}_${randomNum}`;
+        
+        try {
+            const authToken = localStorage.getItem('authToken');
+            // ... (localStorage 상태 확인 console.log) ...
+        } catch (e) {
+            console.error('localStorage 상태 확인 실패:', e);
+        }
+        
+        
+        // --- 순서 변경 ---
+        try {
+            // 1. 인증 상태 확인을 먼저 실행 (내부 재시도 로직으로 토큰 로딩 보장)
+            const isAuthenticated = await checkAuthStatus();
+            
+            if (isAuthenticated) {
+                // 2. 인증이 성공한 후에만 결제 리다이렉트 확인
+                //    (이제 checkPaymentRedirect -> verifyPayment -> authenticatedFetch가 토큰을 가짐)
+                checkPaymentRedirect(); 
+                
+                // 3. 포인트 잔액 및 상품 정보 로드
+                await Promise.all([
+                    loadPointBalance(),
+                    loadProductInfo()
+                ]);
+            } else {
+                // 인증되지 않은 경우 상품 정보만 로드 (공개 API)
+                loadProductInfo();
+            }
+        } catch (error) {
+            console.error('페이지 초기화 중 오류:', error);
+            // 오류 발생 시에도 상품 정보는 로드
+            loadProductInfo();
+        }
+    });
+</script>
+</body>
+</html>
+

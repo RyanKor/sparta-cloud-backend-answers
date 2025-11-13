@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로그인 - Sparta Point Shop</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 450px;
+            width: 100%;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .logo p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 15px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            width: 100%;
+            padding: 15px;
+            background: #f0f0f0;
+            color: #333;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .result.success {
+            background: #d4edda;
+            border: 2px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .result.error {
+            background: #f8d7da;
+            border: 2px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .result.info {
+            background: #d1ecf1;
+            border: 2px solid #bee5eb;
+            color: #0c5460;
+        }
+
+        .link-text {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .link-text a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .link-text a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="logo">
+        <h1>🛒 Sparta Point Shop</h1>
+        <p>로그인하여 포인트 결제를 시작하세요</p>
+    </div>
+
+    <form id="loginForm">
+        <div class="form-group">
+            <label for="email">이메일</label>
+            <input type="email" id="email" placeholder="이메일을 입력하세요" required>
+        </div>
+
+        <div class="form-group">
+            <label for="password">비밀번호</label>
+            <input type="password" id="password" placeholder="비밀번호를 입력하세요" required>
+        </div>
+
+        <button type="button" class="btn-primary" id="loginButton" onclick="handleLogin()">로그인</button>
+        <button type="button" class="btn-secondary" onclick="window.location.href='register.html'">회원가입</button>
+    </form>
+
+    <div class="link-text">
+        계정이 없으신가요? <a href="register.html">회원가입하기</a>
+    </div>
+
+    <div id="result" class="result"></div>
+</div>
+
+<script>
+    const API_BASE_URL = '';
+
+    // JWT 토큰 관리
+    function setAuthToken(token, userData) {
+        localStorage.setItem('authToken', token);
+        localStorage.setItem('userId', userData.userId);
+        localStorage.setItem('userEmail', userData.email);
+        localStorage.setItem('userName', userData.name);
+    }
+
+    function removeAuthToken() {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userId');
+        localStorage.removeItem('userEmail');
+        localStorage.removeItem('userName');
+    }
+
+    // 결과 표시 함수
+    function showResult(type, message) {
+        const resultDiv = document.getElementById('result');
+        resultDiv.className = `result ${type}`;
+        resultDiv.style.display = 'block';
+        resultDiv.textContent = message;
+    }
+
+    // 로그인 처리
+    async function handleLogin() {
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const loginButton = document.getElementById('loginButton');
+
+        if (!email || !password) {
+            showResult('error', '이메일과 비밀번호를 입력해주세요.');
+            return;
+        }
+
+        try {
+            loginButton.disabled = true;
+            loginButton.textContent = '로그인 중...';
+            showResult('info', '로그인하고 있습니다...');
+
+            const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                setAuthToken(data.token, {
+                    userId: data.userId,
+                    email: data.email,
+                    name: data.name
+                });
+
+                showResult('success', '로그인 성공! 페이지로 이동합니다...');
+                
+                // 1초 후 메인 페이지로 이동
+                setTimeout(() => {
+                    window.location.href = 'point-payment.html';
+                }, 1000);
+            } else {
+                showResult('error', data.error || '로그인에 실패했습니다.');
+                loginButton.disabled = false;
+                loginButton.textContent = '로그인';
+            }
+        } catch (error) {
+            console.error('로그인 오류:', error);
+            showResult('error', `오류: ${error.message}`);
+            loginButton.disabled = false;
+            loginButton.textContent = '로그인';
+        }
+    }
+
+    // Enter 키로 로그인
+    document.getElementById('password').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            handleLogin();
+        }
+    });
+
+    // 이미 로그인되어 있는지 확인
+    window.addEventListener('load', function() {
+        const token = localStorage.getItem('authToken');
+        if (token) {
+            // 이미 로그인되어 있으면 메인 페이지로 이동
+            window.location.href = 'point-payment.html';
+        }
+    });
+</script>
+</body>
+</html>
+
