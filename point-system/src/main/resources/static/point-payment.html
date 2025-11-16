@@ -550,8 +550,8 @@
 
 <script>
     const API_BASE_URL = '';
-    const STORE_ID = '본인의 발급한 포트원 store id를 넣어주세요';
-    const CHANNEL_KEY = '본인의 발급한 포트원 channel key를 넣어주세요';
+    const STORE_ID = 'store-18cc2578-590f-4da9-be72-0aeac4a12638';
+    const CHANNEL_KEY = 'channel-key-f629850f-544f-4cf9-ad22-1b561acf42d0';
     
     let USER_ID = null;
     let authToken = null;
@@ -1409,9 +1409,10 @@
     // 페이지 로드 시 초기화
     window.addEventListener('load', async function() {
         console.log('페이지 로드 시작:', window.location.href);
-        console.log('localStorage 사용 가능 여부:', isLocalStorageAvailable());
         
-        // ... (localStorage 접근 확인 로직은 그대로 둡니다) ...
+        // localStorage 사용 가능 여부를 먼저 확인
+        const localStorageReady = isLocalStorageAvailable();
+        console.log('localStorage 사용 가능 여부:', localStorageReady);
         if (!localStorageReady) {
             console.error('localStorage 접근 불가 - 로그인 페이지로 이동');
             window.location.href = 'login.html';
